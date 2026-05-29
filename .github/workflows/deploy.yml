@@ -1,0 +1,65 @@
+name: Deploy a GitHub Pages
+
+# Publica el sitio Vite estático en GitHub Pages
+# cuando hago push a `main`. También se puede disparar a mano.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Permisos mínimos requeridos por la action de Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Evita despliegues concurrentes (cancela el viejo si pusheo dos veces).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: SPA fallback (copia index.html a 404.html)
+        # Truco clásico: GitHub Pages, cuando alguien refresca una ruta
+        # tipo /galeria, sirve 404.html. Si ese 404 es el mismo
+        # index.html, React Router se queda con el control y muestra
+        # la página correcta. Es lo que se usa en cualquier SPA hosteada
+        # en Pages.
+        run: cp dist/index.html dist/404.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artefacto
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
