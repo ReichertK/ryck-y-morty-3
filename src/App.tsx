@@ -1,6 +1,6 @@
 // Esqueleto de rutas. Cada página entra por lazy() así la home no se
 // trae el editor ni html-to-image hasta que el usuario pisa /taller.
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
@@ -37,6 +37,20 @@ export default function App() {
   // La ubicación va como key del <Routes> para que AnimatePresence
   // tome cada cambio de ruta como un mount/unmount y anime la salida.
   const ubicacion = useLocation();
+
+  // Pista para el que abre DevTools: tira el Konami y abre el portal.
+  // Lo tiro una sola vez al montar el árbol; en StrictMode dev sale
+  // dos veces y no me preocupa, es sólo desarrollo.
+  useEffect(() => {
+    console.log(
+      "%c¿Aburrido? Probá el código de los 30 vidas de Contra…",
+      "color:#97ce4c;font-size:14px;font-weight:bold;text-shadow:0 0 6px rgba(151,206,76,0.6);font-family:monospace;"
+    );
+    console.log(
+      "%c↑ ↑ ↓ ↓ ← → ← → B A",
+      "color:#d4ff86;font-size:12px;font-family:monospace;letter-spacing:4px;"
+    );
+  }, []);
 
   return (
     <ToastProvider>

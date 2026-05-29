@@ -255,3 +255,41 @@ body {
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(151,206,76,0.25); border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(151,206,76,0.5); }
+
+/* --- Glitch sutil del copyright (pista del easter egg) -------------- */
+/* Uso dos pseudo-elementos con el mismo texto desplazado y filtrado
+   en RGB; clásico glitch de Pickle Rick sin libs. */
+.glitch-copy {
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 0 6px rgba(151,206,76,0.5);
+}
+.glitch-copy::before,
+.glitch-copy::after {
+  content: attr(data-texto);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.glitch-copy::before {
+  color: #ff3b6b;
+  animation: glitch-shift 1.6s infinite steps(2, end);
+  clip-path: inset(0 0 60% 0);
+}
+.glitch-copy::after {
+  color: #44318d;
+  animation: glitch-shift 2.1s infinite reverse steps(2, end);
+  clip-path: inset(55% 0 0 0);
+}
+@keyframes glitch-shift {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-1px, 1px); }
+  40%  { transform: translate(1px, -1px); }
+  60%  { transform: translate(-2px, 0); }
+  80%  { transform: translate(2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glitch-copy::before, .glitch-copy::after { animation: none; }
+}

@@ -1,6 +1,6 @@
 // Pie de página. Mantiene la onda postal del proyecto original pero con
 // la paleta espacial. Cada visita arranca con una cita random del show.
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // Citas neutras (mezcla de doblaje + traducciones que ya circulan).
 // Las elijo random una sola vez por montaje así quedan fijas mientras
@@ -56,6 +56,26 @@ export default function Pie() {
     []
   );
 
+  // Pista visual: si dejan el mouse sobre el copyright 3s, el texto
+  // arranca con un glitch sutil y el cursor cambia a "help". Es una
+  // señal de que hay algo escondido por ahí. Uso ref para el timer así
+  // no se reinicia con re-renders.
+  const [glitch, setGlitch] = useState(false);
+  const refTimer = useRef<number | null>(null);
+
+  function arrancarHover() {
+    if (refTimer.current) return;
+    refTimer.current = window.setTimeout(() => setGlitch(true), 3000);
+  }
+  function cortarHover() {
+    if (refTimer.current) {
+      clearTimeout(refTimer.current);
+      refTimer.current = null;
+    }
+    setGlitch(false);
+  }
+  useEffect(() => () => { if (refTimer.current) clearTimeout(refTimer.current); }, []);
+
   return (
     <footer className="relative z-10 mt-16 border-t border-portal/20 bg-espacio-2/60 backdrop-blur">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-2">
@@ -89,7 +109,15 @@ export default function Pie() {
           </ul>
         </div>
       </div>
-      <p className="tipo-mono border-t border-papel/10 py-3 text-center text-[11px] text-papel/50">
+      <p
+        onMouseEnter={arrancarHover}
+        onMouseLeave={cortarHover}
+        className={
+          "tipo-mono border-t border-papel/10 py-3 text-center text-[11px] text-papel/50 transition-colors " +
+          (glitch ? "glitch-copy cursor-help text-portal/80" : "cursor-default")
+        }
+        data-texto={`© ${anio} Imprenta C-137 · Hecho a mano por un humano, sin templates ni IA · 100% libre de Cronenbergs`}
+      >
         © {anio} Imprenta C-137 · Hecho a mano por un humano, sin templates ni IA ·
         <span className="ml-1 text-portal/70">100% libre de Cronenbergs</span>
       </p>
